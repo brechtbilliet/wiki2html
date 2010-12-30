@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>wiki2HTML</title>
+		
+<!--
+	wiki2HTML Parses wiki markup and generates HTML 4.01 showing a preview.
+    Copyright (C) 2010 Elia Contini
+    
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+    
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see http://www.gnu.org/licenses/.
+-->
+		
+		<style type="text/css" media="screen">
+			body
+				{
+					background-color: #fff;
+					color: #000;
+					font-family: sans-serif;
+					font-size: 1.0em;
+					margin: 0;
+					padding: 0
+				}
+				
+			.hidden
+				{
+					display: none
+				}
+				
+			a.button:link, a.button:visited
+				{
+					background-color: #eee;
+					border-bottom: 1px solid #ccc;
+					border-left: 1px solid #ccc;
+					border-right: 1px solid #ccc;
+					color: #000;
+					font-weight: bold;
+					margin: 0 0.1em 0 0;
+					padding: 0.25em;
+					text-align: center;
+					text-decoration: none;
+				}
+				
+			div.warning
+				{
+					background-color: #ffffe6;
+					color: #000;
+					border: 2px solid #ffffb3;
+					margin: 0.5em;
+					padding: 0.25em;
+					text-align: center
+				}
+			
+			#header
+				{
+					background-color: #000;
+					color: #fff;
+					font-size: 1.5em;
+					font-weight: bold;
+					padding: 0.5em
+				}
+			
+			#content
+				{
+					height: 552px;
+					margin: 0 auto;
+					overflow: hidden;
+					padding: 0;
+					position: relative;
+					width: 902px
+				}
+				
+			#controls, #footer
+				{
+					clear: both;
+					margin: 0 auto;
+					overflow: hidden;
+					padding: 0.25em  0 0.5em 0;
+					width: 902px
+				}
+			
+			#footer
+				{
+					font-size: 0.8em;
+					text-align: center
+				}
+
+			#codePage, #previewPage
+				{
+					border: 1px solid #ccc;
+					background-color: #fff;
+					color: #000;
+					height: 550px;
+					left: 0;
+					overflow: auto;
+					padding: 0;
+					position: absolute;
+					top: 0;
+					width: 900px
+				}
+				
+			#codePage
+				{
+					overflow: hidden;
+					z-index: 10;
+				}
+				
+			textarea
+				{
+					position: absolute;
+					top: 0;
+					right: 0;
+					border: none;
+					font-family: monospace;
+					font-size: 1.5em;
+					margin: 0;
+					height: 550px;
+					width: 898px
+				}
+				
+			label
+				{
+					display: none;
+				}
+				
+			fieldset
+				{
+					border: none;
+					margin: 0;
+					padding: 0
+				}
+		</style>
+	</head>
+	<body>
+		<div id="header">
+			wiki2HTML
+		</div>
+		
+		<div id="content">
+			<div id="codePage">
+				<form action="#" method="post">
+					<fieldset>
+						<label for="code">Wiki Code:</label><br>
+						<textarea id="code" cols="65" rows="21">
+=You can write a title=
+
+You can insert an image [[File:anImage.png|alt=Image example]],
+make your text '''bold''' or ''italic''.
+
+You can create an ordered list
+
+# and this is the first item
+# followed by the second one
+
+You can divide text using an horizontal rule
+
+----
+
+or create
+
+==A subsection==
+
+that contains an unordered list
+
+* with an item
+* followed by the second one
+						</textarea>
+					</fieldset>
+				</form>
+			</div>
+			
+			<div id="previewPage">
+				<div id="preview">
+					<p>Nothing to show</p>
+				</div>
+			</div>
+		</div>
+		
+		<div id="controls">
+			<a href="#" class="button" title="Show the preview of the page" onclick="return show('previewPage');">Preview</a> <span class="hidden">|</span>
+			<a href="#" class="button" title="Show the source code of the page" onclick="return show('codePage');">Source</a>
+		</div>
+		
+		<div id="footer">
+			&copy; 2010 - Created by Elia Contini and released under <a href="http://www.gnu.org/licenses/gpl.html" title="Read the license [External link]" rel="license"><abbr title="Gnu is Not Unix">GNU</abbr> <abbr title="General Public License">GPL</abbr> 3</a>.
+		</div>
+		
+		<script type="text/javascript">
+			
+			var heightLim = 550; //px
+			var widthLim = 900;  //px
+			
+			var currentPage = 'codePage';
+			
+			var offset = 0;
+			var timer;
+			
+			function slide(from, to)
+				{
+					var fromPage = document.getElementById(from);
+					var toPage = document.getElementById(to);
+					
+					if(offset <= widthLim)
+						{
+							if(from == 'codePage')
+								{
+									fromPage.setAttribute('style', 'z-index: 0; position: absolute; top: 0; left:0; clear: both; display: block; width:' + widthLim  + 'px; height:' + heightLim + 'px');
+									toPage.setAttribute('style', 'z-index: 10; position: absolute; top: 0; left:' + (widthLim - offset)  + 'px; clear: both; display: block; width:' + widthLim + 'px; height:' + heightLim + 'px');
+								}
+							else
+								{
+									fromPage.setAttribute('style', 'z-index: 10; position: absolute; top: 0; left:'+ offset  +'px; clear: both; display: block; width:' + widthLim  + 'px; height:' + heightLim + 'px');
+									toPage.setAttribute('style', 'z-index: 0; position: absolute; top: 0; left:0; clear: both; display: block; width:' + widthLim + 'px; height:' + heightLim + 'px');
+								}
+							
+							offset = offset + 25;
+							timer = setTimeout("slide('" + from +"', '" + to + "')", 1);
+						}
+					else
+						{
+							clearTimeout(timer);
+							offset = 0;
+							currentPage = to;
+							fromPage.setAttribute('style', 'z-index: 0');
+							toPage.setAttribute('style', 'z-index: 10');
+						}
+				}
+			
+			function show(what)
+				{
+					preview('code', 'preview');
+					
+					if(what == 'previewPage' && what != currentPage)
+						{
+							slide('codePage', 'previewPage');
+						}
+					else if(what == 'codePage' && what != currentPage)
+						slide('previewPage', 'codePage');
+						
+					return false;
+				}
+			
+			function preview(sourceWindow, previewWindow)
+				{	
+					var wikicode = document.getElementById(sourceWindow).value;
+					var preview = document.getElementById(previewWindow);
+					
+					/*******************************************************************************
+					 *                              HEADING LEVELS                                 *
+					*******************************************************************************/
+					var heading_1_regEx = /=([0-9A-Za-z].[^=\[]*)=/g;
+					var heading_2_regEx = /==([0-9A-Za-z].[^=\[]*)==/g;
+					var heading_3_regEx = /===([0-9A-Za-z].[^=\[]*)===/g;
+					var heading_4_regEx = /====([0-9A-Za-z].[^=\[]*)====/g;
+					var heading_5_regEx = /=====([0-9A-Za-z].[^=\[]*)=====/g;
+					var heading_6_regEx = /======([0-9A-Za-z].[^=\[]*)======/g;
+					
+					wikicode = wikicode.replace(heading_6_regEx, '<h6>$1</h6>');
+					wikicode = wikicode.replace(heading_5_regEx, '<h5>$1</h5>');
+					wikicode = wikicode.replace(heading_4_regEx, '<h4>$1</h4>');
+					wikicode = wikicode.replace(heading_3_regEx, '<h3>$1</h3>');
+					wikicode = wikicode.replace(heading_2_regEx, '<h2>$1</h2>');
+					wikicode = wikicode.replace(heading_1_regEx, '<h1>$1</h1>');
+					
+					/*******************************************************************************
+					 *                             HORIZONTAL LINE                                 *
+					*******************************************************************************/
+					var horizontalLine = /----/g;
+					
+					wikicode = wikicode.replace(horizontalLine, '<hr>');
+					
+					/*******************************************************************************
+					 *                              INLINE ELEMENTS                                *
+					*******************************************************************************/
+					var em = /''([0-9A-Za-z].*)''/g;
+					var strong = /'''([0-9A-Za-z].*)'''/g;
+					var strongEm = /'''''([0-9A-Za-z].*)'''''/g;
+					var image = /\[\[File:(.[^|]*)[|]alt=(.[^\]]*)\]\]/g;
+					var anchor = /\[([a-zA-Z0-9].*) ([a-zA-Z0-9]*)\]/g;
+					
+					wikicode = wikicode.replace(strongEm, '<strong><em>$1</em></strong>');
+					wikicode = wikicode.replace(strong, '<strong>$1</strong>');
+					wikicode = wikicode.replace(em, '<em>$1</em>');
+					wikicode = wikicode.replace(image, '<img src="$1" alt="$2">');
+					wikicode = wikicode.replace(anchor, '<a href="$1">$2</a>');
+					
+					/*******************************************************************************
+					 *                                 LISTS                                       *
+					*******************************************************************************/
+					
+					// unordered
+					var unorderedListItem = /^\*[:]?[\*]* (.*)/gm;
+					var unorderedStartList = /([^</li>][>]?[\n])<li>/g;
+					var unorderedEndList = /<\/li>([\n][^<li>])/g;
+					
+					wikicode = wikicode.replace(unorderedListItem, '<li>$1</li>');
+					wikicode = wikicode.replace(unorderedStartList, '$1<ul><li>');
+					wikicode = wikicode.replace(unorderedEndList, '</ul>\n$1');
+					
+					// ordered
+					var orderedListItem = /^#[:]?[#]* (.*)/gm;
+					var orderedStartList = /([^</li>][>]?[\n])<li>/g;
+					var orderedEndList = /<\/li>([\n][^<li>])/g;
+					
+					wikicode = wikicode.replace(orderedListItem, '<li>$1</li>');
+					wikicode = wikicode.replace(orderedStartList, '$1<ol><li>');
+					wikicode = wikicode.replace(orderedEndList, '</ol>\n$1');
+					
+					/*******************************************************************************
+					 *                             TABLE OF CONTENTS                               *
+					*******************************************************************************/
+					var toc = /^__TOC__/g;
+					wikicode = wikicode.replace(toc, '<div class="warning">__TOC__ command is not supported yet.</div>');
+					
+					preview.innerHTML = wikicode;
+
+					return false;
+				}
+		</script>
+	</body>
+</html>
