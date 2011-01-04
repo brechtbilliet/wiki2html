@@ -287,7 +287,7 @@ that contains an unordered list
 					var strong = /'''([0-9A-Za-z].*)'''/g;
 					var strongEm = /'''''([0-9A-Za-z].*)'''''/g;
 					var image = /\[\[File:(.[^|]*)[|]alt=(.[^\]]*)\]\]/g;
-					var anchor = /\[([a-zA-Z0-9].[^\s]*) ([a-zA-Z0-9].*)\]/g;
+					var anchor = /\[([a-zA-Z0-9].[^\s]*) ([a-zA-Z0-9].[^\]]*)\]/g;
 					
 					wikicode = wikicode.replace(strongEm, '<strong><em>$1</em></strong>');
 					wikicode = wikicode.replace(strong, '<strong>$1</strong>');
