@@ -5,8 +5,8 @@
 		<title>wiki2HTML</title>
 		
 <!--
-	wiki2HTML Parses wiki markup and generates HTML 4.01 showing a preview.
-    Copyright (C) 2010 Elia Contini
+	wiki2HTML Parses wiki markup and generates HTML 5 showing a preview.
+    Copyright (C) 2010-2011 Elia Contini
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -155,8 +155,7 @@
 						<textarea id="code" cols="65" rows="21">
 =You can write a title=
 
-You can insert an image [[File:anImage.png|alt=Image example]],
-make your text '''bold''' or ''italic''.
+You can insert an image [[File:anImage.png|alt=Image example]], make your text '''bold''' or ''italic''.
 
 You can create an ordered list
 
@@ -164,11 +163,9 @@ You can create an ordered list
 # followed by the second one
 
 You can divide text using an horizontal rule
-
 ----
 
 or create
-
 ==A subsection==
 
 that contains an unordered list
@@ -193,7 +190,7 @@ that contains an unordered list
 		</div>
 		
 		<div id="footer">
-			&copy; 2010 - Created by Elia Contini and released under <a href="http://www.gnu.org/licenses/gpl.html" title="Read the license [External link]" rel="license"><abbr title="Gnu is Not Unix">GNU</abbr> <abbr title="General Public License">GPL</abbr> 3</a>.
+			&copy; 2011 - Created by Elia Contini and released under <a href="http://www.gnu.org/licenses/gpl.html" title="Read the license [External link]" rel="license"><abbr title="Gnu is Not Unix">GNU</abbr> <abbr title="General Public License">GPL</abbr> 3</a>.
 		</div>
 		
 		<script type="text/javascript">
@@ -239,7 +236,7 @@ that contains an unordered list
 			
 			function show(what)
 				{
-					preview('code', 'preview');
+					wiki2html('code', 'preview');
 					
 					if(what == 'previewPage' && what != currentPage)
 						{
@@ -251,7 +248,7 @@ that contains an unordered list
 					return false;
 				}
 			
-			function preview(sourceWindow, previewWindow)
+			function wiki2html(sourceWindow, previewWindow)
 				{	
 					var wikicode = document.getElementById(sourceWindow).value;
 					var preview = document.getElementById(previewWindow);
@@ -294,6 +291,13 @@ that contains an unordered list
 					wikicode = wikicode.replace(em, '<em>$1</em>');
 					wikicode = wikicode.replace(image, '<img src="$1" alt="$2">');
 					wikicode = wikicode.replace(anchor, '<a href="$1">$2</a>');
+
+					/*******************************************************************************
+					 *                                 PARAGRAPHS                                  *
+					*******************************************************************************/
+					var paragraph = /^\n([^#\*=].*)/gm;
+					
+					wikicode = wikicode.replace(paragraph, '<p>$1</p>');
 					
 					/*******************************************************************************
 					 *                                 LISTS                                       *
@@ -302,25 +306,26 @@ that contains an unordered list
 					// unordered
 					var unorderedListItem = /^\*[:]?[\*]* (.*)/gm;
 					var unorderedStartList = /([^</li>][>]?[\n])<li>/g;
-					var unorderedEndList = /<\/li>([\n][^<li>])/g;
+					var unorderedEndList = /<\/li>\n(?!<li>)/gm;
 					
 					wikicode = wikicode.replace(unorderedListItem, '<li>$1</li>');
 					wikicode = wikicode.replace(unorderedStartList, '$1<ul><li>');
-					wikicode = wikicode.replace(unorderedEndList, '</ul>\n$1');
+					wikicode = wikicode.replace(unorderedEndList, '</ul>');
 					
 					// ordered
 					var orderedListItem = /^#[:]?[#]* (.*)/gm;
 					var orderedStartList = /([^</li>][>]?[\n])<li>/g;
-					var orderedEndList = /<\/li>([\n][^<li>])/g;
+					var orderedEndList = /<\/li>\n(?!<li>)/gm;
 					
 					wikicode = wikicode.replace(orderedListItem, '<li>$1</li>');
 					wikicode = wikicode.replace(orderedStartList, '$1<ol><li>');
-					wikicode = wikicode.replace(orderedEndList, '</ol>\n$1');
+					wikicode = wikicode.replace(orderedEndList, '</li></ol>');
 					
 					/*******************************************************************************
 					 *                             TABLE OF CONTENTS                               *
 					*******************************************************************************/
 					var toc = /^__TOC__/g;
+					
 					wikicode = wikicode.replace(toc, '<div class="warning">__TOC__ command is not supported yet.</div>');
 					
 					preview.innerHTML = wikicode;
