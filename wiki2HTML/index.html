@@ -62,7 +62,7 @@
 					text-align: center
 				}
 			
-			#header
+			header
 				{
 					background-color: #000;
 					color: #fff;
@@ -81,7 +81,7 @@
 					width: 902px
 				}
 				
-			#controls, #footer
+			nav, footer
 				{
 					clear: both;
 					margin: 0 auto;
@@ -90,7 +90,7 @@
 					width: 902px
 				}
 			
-			#footer
+			footer
 				{
 					font-size: 0.8em;
 					text-align: center
@@ -140,12 +140,20 @@
 					margin: 0;
 					padding: 0
 				}
+				
+			img
+				{
+					border: none;
+					display: block;
+					margin: 0 auto;
+					padding: 0
+				}
 		</style>
 	</head>
 	<body>
-		<div id="header">
+		<header>
 			wiki2HTML
-		</div>
+		</header>
 		
 		<div id="content">
 			<div id="codePage">
@@ -184,14 +192,14 @@ that contains an unordered list
 			</div>
 		</div>
 		
-		<div id="controls">
+		<nav>
 			<a href="#" class="button" title="Show the preview of the page" onclick="return show('previewPage');">Preview</a> <span class="hidden">|</span>
 			<a href="#" class="button" title="Show the source code of the page" onclick="return show('codePage');">Source</a>
-		</div>
+		</nav>
 		
-		<div id="footer">
+		<footer>
 			&copy; 2011 - Created by Elia Contini and released under <a href="http://www.gnu.org/licenses/gpl.html" title="Read the license [External link]" rel="license"><abbr title="Gnu is Not Unix">GNU</abbr> <abbr title="General Public License">GPL</abbr> 3</a>.
-		</div>
+		</footer>
 		
 		<script type="text/javascript">
 			
@@ -236,8 +244,12 @@ that contains an unordered list
 			
 			function show(what)
 				{
-					wiki2html('code', 'preview');
-					
+					var wikicode = document.getElementById('code').value;
+					var preview = document.getElementById('preview');
+
+					var html = wiki2html(wikicode);
+					preview.innerHTML = html;
+
 					if(what == 'previewPage' && what != currentPage)
 						{
 							slide('codePage', 'previewPage');
@@ -248,20 +260,19 @@ that contains an unordered list
 					return false;
 				}
 			
-			function wiki2html(sourceWindow, previewWindow)
+			function wiki2html(wikicode)
 				{	
-					var wikicode = document.getElementById(sourceWindow).value;
-					var preview = document.getElementById(previewWindow);
+					var html = '<p>function wiki2html(wikicode): an error occurs</p>';
 					
 					/*******************************************************************************
 					 *                              HEADING LEVELS                                 *
 					*******************************************************************************/
-					var heading_1_regEx = /=([0-9A-Za-z].[^=\[]*)=/g;
-					var heading_2_regEx = /==([0-9A-Za-z].[^=\[]*)==/g;
-					var heading_3_regEx = /===([0-9A-Za-z].[^=\[]*)===/g;
-					var heading_4_regEx = /====([0-9A-Za-z].[^=\[]*)====/g;
-					var heading_5_regEx = /=====([0-9A-Za-z].[^=\[]*)=====/g;
-					var heading_6_regEx = /======([0-9A-Za-z].[^=\[]*)======/g;
+					var heading_1_regEx = /^=[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?=/gm;
+					var heading_2_regEx = /^==[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?==/gm;
+					var heading_3_regEx = /^===[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?===/gm;
+					var heading_4_regEx = /^====[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?====/gm;
+					var heading_5_regEx = /^=====[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?=====/gm;
+					var heading_6_regEx = /^======[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?======/gm;
 					
 					wikicode = wikicode.replace(heading_6_regEx, '<h6>$1</h6>');
 					wikicode = wikicode.replace(heading_5_regEx, '<h5>$1</h5>');
@@ -310,7 +321,7 @@ that contains an unordered list
 					
 					wikicode = wikicode.replace(unorderedListItem, '<li>$1</li>');
 					wikicode = wikicode.replace(unorderedStartList, '$1<ul><li>');
-					wikicode = wikicode.replace(unorderedEndList, '</ul>');
+					wikicode = wikicode.replace(unorderedEndList, '</li></ul>');
 					
 					// ordered
 					var orderedListItem = /^#[:]?[#]* (.*)/gm;
@@ -327,10 +338,10 @@ that contains an unordered list
 					var toc = /^__TOC__/g;
 					
 					wikicode = wikicode.replace(toc, '<div class="warning">__TOC__ command is not supported yet.</div>');
-					
-					preview.innerHTML = wikicode;
 
-					return false;
+					html = wikicode;
+					
+					return html;
 				}
 		</script>
 	</body>
