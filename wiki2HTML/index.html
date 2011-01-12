@@ -140,13 +140,33 @@
 					margin: 0;
 					padding: 0
 				}
+			
+			/*********************************************************************
+			 *                               Images                              *
+			 *********************************************************************/
+			figure
+				{
+					background-color: #eee;
+					border: 1px solid #ccc;
+					float: right;
+					margin: 4px;
+					padding: 4px
+				}
 				
 			img
 				{
-					border: none;
-					display: block;
-					margin: 0 auto;
-					padding: 0
+					border: none
+				}
+				
+			figcaption
+				{
+					clear: both;
+					display: block
+				}
+				
+			figure.thumb, img.thumb
+				{
+					width: 200px
 				}
 		</style>
 	</head>
@@ -163,7 +183,7 @@
 						<textarea id="code" cols="65" rows="21">
 =You can write a title=
 
-You can insert an image [[File:anImage.png|alt=Image example]], make your text '''bold''' or ''italic''.
+You can insert an image [[File:anImage.png|thumb|alt=Alternative text|Caption text]], make your text '''bold''' or ''italic''.
 
 You can create an ordered list
 
@@ -193,8 +213,8 @@ that contains an unordered list
 		</div>
 		
 		<nav>
-			<a href="#" class="button" title="Show the preview of the page" onclick="return show('previewPage');">Preview</a> <span class="hidden">|</span>
-			<a href="#" class="button" title="Show the source code of the page" onclick="return show('codePage');">Source</a>
+			<a href="#" class="button" title="Show the source code of the page" onclick="return show('codePage');">Source</a> <span class="hidden">|</span>
+			<a href="#" class="button" title="Show the preview of the page" onclick="return show('previewPage');">Preview</a>
 		</nav>
 		
 		<footer>
@@ -244,14 +264,13 @@ that contains an unordered list
 			
 			function show(what)
 				{
-					var wikicode = document.getElementById('code').value;
-					var preview = document.getElementById('preview');
-
-					var html = wiki2html(wikicode);
-					preview.innerHTML = html;
-
 					if(what == 'previewPage' && what != currentPage)
 						{
+							var wikicode = document.getElementById('code').value;
+							var preview = document.getElementById('preview');
+	
+							var html = wiki2html(wikicode);
+							preview.innerHTML = html;
 							slide('codePage', 'previewPage');
 						}
 					else if(what == 'codePage' && what != currentPage)
@@ -291,16 +310,30 @@ that contains an unordered list
 					/*******************************************************************************
 					 *                              INLINE ELEMENTS                                *
 					*******************************************************************************/
-					var em = /''([0-9A-Za-z].*)''/g;
-					var strong = /'''([0-9A-Za-z].*)'''/g;
 					var strongEm = /'''''([0-9A-Za-z].*)'''''/g;
-					var image = /\[\[File:(.[^|]*)[|]alt=(.[^\]]*)\]\]/g;
+					var strong = /'''([0-9A-Za-z].*)'''/g;
+					var em = /''([0-9A-Za-z].*)''/g;
+					var image = /\[\[File:(.[^\]|]*)([|]thumb|frame)?([|]alt=.[^\]|]*)?([|].[^\]|]*)?\]\]/g;
 					var anchor = /\[([a-zA-Z0-9].[^\s]*) ([a-zA-Z0-9].[^\]]*)\]/g;
-					
+
 					wikicode = wikicode.replace(strongEm, '<strong><em>$1</em></strong>');
 					wikicode = wikicode.replace(strong, '<strong>$1</strong>');
 					wikicode = wikicode.replace(em, '<em>$1</em>');
-					wikicode = wikicode.replace(image, '<img src="$1" alt="$2">');
+
+					while(tokens = image.exec(wikicode))
+					{
+						if(tokens.length == 5 && typeof(tokens[2]) != 'undefined' && typeof(tokens[3]) != 'undefined' && typeof(tokens[4]) != 'undefined')
+							{
+								tokens[2] = tokens[2].replace('|', '');
+								tokens[3] = tokens[3].replace('|alt=', '');
+								tokens[4] = tokens[4].replace('|', '');
+								wikicode = wikicode.replace(tokens[0], '<figure class="' + tokens[2] + '"><img src="' + tokens[1] + '" class="' + tokens[2] + '" alt="' + tokens[3] + '"><figcaption>' + tokens[4] + '</figcaption></figure>');
+							}
+						else
+							wikicode = wikicode.replace(tokens[0], '<div class="warning">WARNING: your image code is incomplete. Good practices for images impose to specify an alternative text, a caption and if the image is a frame or a thumbnail. For example, <code>&#091;&#091;File:anImage.png|thumb|alt=Alternative text|Caption text&#093;&#093;</code></div>');
+						
+					}
+					
 					wikicode = wikicode.replace(anchor, '<a href="$1">$2</a>');
 
 					/*******************************************************************************
