@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<meta name="author" content="Elia Contini, elia.contini@gmail.com">
 		<title>wiki2HTML</title>
 		
 <!--
@@ -168,6 +169,28 @@
 				{
 					width: 200px
 				}
+				
+			/*********************************************************************
+			 *                               Tables                              *
+			 *********************************************************************/
+			table
+				{
+					border: 1px solid #ccc;
+					margin: 0 auto
+				}
+			
+			th, td
+				{
+					border: 1px solid #ccc;
+					padding: 0.2em
+				}
+				
+			th
+				{
+					background-color: #eee;
+					font-weight: bold;
+					text-align: center
+				}
 		</style>
 	</head>
 	<body>
@@ -192,6 +215,26 @@ You can create an ordered list
 
 You can divide text using an horizontal rule
 ----
+
+create a table
+{|
+|-
+! Header 1
+! Header 2
+! Header 3
+|-
+| row 1, cell 1
+| row 1, cell 2
+| row 1, cell 3
+|-
+| row 2, cell 1
+| row 2, cell 2
+| row 2, cell 3
+|-
+| row 3, cell 1
+| row 3, cell 2
+| row 3, cell 3
+|}
 
 or create
 ==A subsection==
@@ -364,6 +407,21 @@ that contains an unordered list
 					wikicode = wikicode.replace(orderedListItem, '<li>$1</li>');
 					wikicode = wikicode.replace(orderedStartList, '$1<ol><li>');
 					wikicode = wikicode.replace(orderedEndList, '</li></ol>');
+
+					/*******************************************************************************
+					 *                                  TABLES                                     *
+					*******************************************************************************/
+					var tableStart = /^{\|\n\|-/gm;
+					var tableRow = /^\|-/gm;
+					var tableHeader = /^!\s(.*)/gm;
+					var tableData = /^\|\s(.*)/gm;
+					var tableEnd = /^\|}/gm;
+
+					wikicode = wikicode.replace(tableStart, '<table><tr>');
+					wikicode = wikicode.replace(tableRow, '</tr><tr>');
+					wikicode = wikicode.replace(tableHeader, '<th>$1</th>');
+					wikicode = wikicode.replace(tableData, '<td>$1</td>');
+					wikicode = wikicode.replace(tableEnd, '</tr></table>');
 					
 					/*******************************************************************************
 					 *                             TABLE OF CONTENTS                               *
