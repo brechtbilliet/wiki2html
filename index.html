@@ -23,175 +23,7 @@
     along with this program. If not, see http://www.gnu.org/licenses/.
 -->
 		
-		<style type="text/css" media="screen">
-			body
-				{
-					background-color: #fff;
-					color: #000;
-					font-family: sans-serif;
-					font-size: 1.0em;
-					margin: 0;
-					padding: 0
-				}
-				
-			.hidden
-				{
-					display: none
-				}
-				
-			a.button:link, a.button:visited
-				{
-					background-color: #eee;
-					border-bottom: 1px solid #ccc;
-					border-left: 1px solid #ccc;
-					border-right: 1px solid #ccc;
-					color: #000;
-					font-weight: bold;
-					margin: 0 0.1em 0 0;
-					padding: 0.25em;
-					text-align: center;
-					text-decoration: none;
-				}
-				
-			div.warning
-				{
-					background-color: #ffffe6;
-					color: #000;
-					border: 2px solid #ffffb3;
-					margin: 0.5em;
-					padding: 0.25em;
-					text-align: center
-				}
-			
-			header
-				{
-					background-color: #000;
-					color: #fff;
-					font-size: 1.5em;
-					font-weight: bold;
-					padding: 0.5em
-				}
-			
-			#content
-				{
-					height: 552px;
-					margin: 0 auto;
-					overflow: hidden;
-					padding: 0;
-					position: relative;
-					width: 902px
-				}
-				
-			nav, footer
-				{
-					clear: both;
-					margin: 0 auto;
-					overflow: hidden;
-					padding: 0.25em  0 0.5em 0;
-					width: 902px
-				}
-			
-			footer
-				{
-					font-size: 0.8em;
-					text-align: center
-				}
-
-			#codePage, #previewPage
-				{
-					border: 1px solid #ccc;
-					background-color: #fff;
-					color: #000;
-					height: 550px;
-					left: 0;
-					overflow: auto;
-					padding: 0;
-					position: absolute;
-					top: 0;
-					width: 900px
-				}
-				
-			#codePage
-				{
-					overflow: hidden;
-					z-index: 10;
-				}
-				
-			textarea
-				{
-					position: absolute;
-					top: 0;
-					right: 0;
-					border: none;
-					font-family: monospace;
-					font-size: 1.5em;
-					margin: 0;
-					height: 550px;
-					width: 898px
-				}
-				
-			label
-				{
-					display: none;
-				}
-				
-			fieldset
-				{
-					border: none;
-					margin: 0;
-					padding: 0
-				}
-			
-			/*********************************************************************
-			 *                               Images                              *
-			 *********************************************************************/
-			figure
-				{
-					background-color: #eee;
-					border: 1px solid #ccc;
-					float: right;
-					margin: 4px;
-					padding: 4px
-				}
-				
-			img
-				{
-					border: none
-				}
-				
-			figcaption
-				{
-					clear: both;
-					display: block
-				}
-				
-			figure.thumb, img.thumb
-				{
-					width: 200px
-				}
-				
-			/*********************************************************************
-			 *                               Tables                              *
-			 *********************************************************************/
-			table
-				{
-					border: 1px solid #ccc;
-					margin: 0 auto
-				}
-			
-			th, td
-				{
-					border: 1px solid #ccc;
-					padding: 0.2em
-				}
-				
-			th
-				{
-					background-color: #eee;
-					font-weight: bold;
-					text-align: center
-				}
-		</style>
+		<link rel="stylesheet" href="css/style.css" media="screen">
 	</head>
 	<body>
 		<header>
@@ -203,8 +35,7 @@
 				<form action="#" method="post">
 					<fieldset>
 						<label for="code">Wiki Code:</label><br>
-						<textarea id="code" cols="65" rows="21">
-=You can write a title=
+						<textarea id="code" cols="65" rows="21">=You can write a title=
 
 You can insert an image [[File:anImage.png|thumb|alt=Alternative text|Caption text]], make your text '''bold''' or ''italic''.
 
@@ -218,7 +49,6 @@ You can divide text using an horizontal rule
 
 create a table
 {|
-|-
 ! Header 1
 ! Header 2
 ! Header 3
@@ -243,7 +73,7 @@ that contains an unordered list
 
 * with an item
 * followed by the second one
-						</textarea>
+</textarea>
 					</fieldset>
 				</form>
 			</div>
@@ -252,6 +82,7 @@ that contains an unordered list
 				<div id="preview">
 					<p>Nothing to show</p>
 				</div>
+				<!-- <textarea id="preview" cols="60" rows="15"></textarea> -->
 			</div>
 		</div>
 		
@@ -313,7 +144,15 @@ that contains an unordered list
 							var preview = document.getElementById('preview');
 	
 							var html = wiki2html(wikicode);
+							
+							// debug
+							//html = html.replace(/</g, '&lt;');
+							//html = html.replace(/>/g, '&gt;');
+							//html = html.replace(/\r/g, '-r-');
+							//html = html.replace(/\n/g, "-n-\n");
+							
 							preview.innerHTML = html;
+							
 							slide('codePage', 'previewPage');
 						}
 					else if(what == 'codePage' && what != currentPage)
@@ -321,119 +160,7 @@ that contains an unordered list
 						
 					return false;
 				}
-			
-			function wiki2html(wikicode)
-				{	
-					var html = '<p>function wiki2html(wikicode): an error occurs</p>';
-					
-					/*******************************************************************************
-					 *                              HEADING LEVELS                                 *
-					*******************************************************************************/
-					var heading_1_regEx = /^=[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?=/gm;
-					var heading_2_regEx = /^==[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?==/gm;
-					var heading_3_regEx = /^===[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?===/gm;
-					var heading_4_regEx = /^====[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?====/gm;
-					var heading_5_regEx = /^=====[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?=====/gm;
-					var heading_6_regEx = /^======[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?======/gm;
-					
-					wikicode = wikicode.replace(heading_6_regEx, '<h6>$1</h6>');
-					wikicode = wikicode.replace(heading_5_regEx, '<h5>$1</h5>');
-					wikicode = wikicode.replace(heading_4_regEx, '<h4>$1</h4>');
-					wikicode = wikicode.replace(heading_3_regEx, '<h3>$1</h3>');
-					wikicode = wikicode.replace(heading_2_regEx, '<h2>$1</h2>');
-					wikicode = wikicode.replace(heading_1_regEx, '<h1>$1</h1>');
-					
-					/*******************************************************************************
-					 *                             HORIZONTAL LINE                                 *
-					*******************************************************************************/
-					var horizontalLine = /----/g;
-					
-					wikicode = wikicode.replace(horizontalLine, '<hr>');
-					
-					/*******************************************************************************
-					 *                              INLINE ELEMENTS                                *
-					*******************************************************************************/
-					var strongEm = /'''''([0-9A-Za-z].*)'''''/g;
-					var strong = /'''([0-9A-Za-z].*)'''/g;
-					var em = /''([0-9A-Za-z].*)''/g;
-					var image = /\[\[File:(.[^\]|]*)([|]thumb|frame)?([|]alt=.[^\]|]*)?([|].[^\]|]*)?\]\]/g;
-					var anchor = /\[([a-zA-Z0-9].[^\s]*) ([a-zA-Z0-9].[^\]]*)\]/g;
-
-					wikicode = wikicode.replace(strongEm, '<strong><em>$1</em></strong>');
-					wikicode = wikicode.replace(strong, '<strong>$1</strong>');
-					wikicode = wikicode.replace(em, '<em>$1</em>');
-
-					while(tokens = image.exec(wikicode))
-					{
-						if(tokens.length == 5 && typeof(tokens[2]) != 'undefined' && typeof(tokens[3]) != 'undefined' && typeof(tokens[4]) != 'undefined')
-							{
-								tokens[2] = tokens[2].replace('|', '');
-								tokens[3] = tokens[3].replace('|alt=', '');
-								tokens[4] = tokens[4].replace('|', '');
-								wikicode = wikicode.replace(tokens[0], '<figure class="' + tokens[2] + '"><img src="' + tokens[1] + '" class="' + tokens[2] + '" alt="' + tokens[3] + '"><figcaption>' + tokens[4] + '</figcaption></figure>');
-							}
-						else
-							wikicode = wikicode.replace(tokens[0], '<div class="warning">WARNING: your image code is incomplete. Good practices for images impose to specify an alternative text, a caption and if the image is a frame or a thumbnail. For example, <code>&#091;&#091;File:anImage.png|thumb|alt=Alternative text|Caption text&#093;&#093;</code></div>');
-						
-					}
-					
-					wikicode = wikicode.replace(anchor, '<a href="$1">$2</a>');
-
-					/*******************************************************************************
-					 *                                 PARAGRAPHS                                  *
-					*******************************************************************************/
-					var paragraph = /^\n([^#\*=].*)/gm;
-					
-					wikicode = wikicode.replace(paragraph, '<p>$1</p>');
-					
-					/*******************************************************************************
-					 *                                 LISTS                                       *
-					*******************************************************************************/
-					
-					// unordered
-					var unorderedListItem = /^\*[:]?[\*]* (.*)/gm;
-					var unorderedStartList = /([^</li>][>]?[\n])<li>/g;
-					var unorderedEndList = /<\/li>\n(?!<li>)/gm;
-					
-					wikicode = wikicode.replace(unorderedListItem, '<li>$1</li>');
-					wikicode = wikicode.replace(unorderedStartList, '$1<ul><li>');
-					wikicode = wikicode.replace(unorderedEndList, '</li></ul>');
-					
-					// ordered
-					var orderedListItem = /^#[:]?[#]* (.*)/gm;
-					var orderedStartList = /([^</li>][>]?[\n])<li>/g;
-					var orderedEndList = /<\/li>\n(?!<li>)/gm;
-					
-					wikicode = wikicode.replace(orderedListItem, '<li>$1</li>');
-					wikicode = wikicode.replace(orderedStartList, '$1<ol><li>');
-					wikicode = wikicode.replace(orderedEndList, '</li></ol>');
-
-					/*******************************************************************************
-					 *                                  TABLES                                     *
-					*******************************************************************************/
-					var tableStart = /^{\|\n\|-/gm;
-					var tableRow = /^\|-/gm;
-					var tableHeader = /^!\s(.*)/gm;
-					var tableData = /^\|\s(.*)/gm;
-					var tableEnd = /^\|}/gm;
-
-					wikicode = wikicode.replace(tableStart, '<table><tr>');
-					wikicode = wikicode.replace(tableRow, '</tr><tr>');
-					wikicode = wikicode.replace(tableHeader, '<th>$1</th>');
-					wikicode = wikicode.replace(tableData, '<td>$1</td>');
-					wikicode = wikicode.replace(tableEnd, '</tr></table>');
-					
-					/*******************************************************************************
-					 *                             TABLE OF CONTENTS                               *
-					*******************************************************************************/
-					var toc = /^__TOC__/g;
-					
-					wikicode = wikicode.replace(toc, '<div class="warning">__TOC__ command is not supported yet.</div>');
-
-					html = wikicode;
-					
-					return html;
-				}
 		</script>
+		<script type="text/javascript" src="js/wiki2html.js"></script>
 	</body>
 </html>
