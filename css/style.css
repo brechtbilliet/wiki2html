@@ -49,9 +49,15 @@ header
 	{
 		background-color: #000;
 		color: #fff;
-		font-size: 1.5em;
-		font-weight: bold;
 		padding: 0.5em
+	}
+	
+header h1
+	{
+		font-size: 1.3em;
+		font-weight: bold;
+		margin: 0;
+		padding: 0
 	}
 
 #content
