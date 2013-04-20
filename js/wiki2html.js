@@ -1,6 +1,6 @@
 /*
 	wiki2HTML Parses wiki markup and generates HTML 5 showing a preview.
-    Copyright (C) 2010-2011 Elia Contini
+    Copyright (C) 2010-2013 Elia Contini
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,39 +18,37 @@
 
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
 
-function wiki2html(wikicode)
-	{	
+var wiki2html = {
+	
+	parse: function(wikicode) {	
 		var html = '<p>function wiki2html(wikicode): an error occurs</p>';
 		
-		wikicode = deleteCR(wikicode);
-		wikicode = headers(wikicode);
-		wikicode = horizontalRule(wikicode);
-		wikicode = inlineElement(wikicode);
-		wikicode = list(wikicode);
-		wikicode = table(wikicode);
-		wikicode = paragraph(wikicode);
-		wikicode = toc(wikicode);
+		wikicode = this._deleteCR(wikicode);
+		wikicode = this._headers(wikicode);
+		wikicode = this._horizontalRule(wikicode);
+		wikicode = this._inlineElement(wikicode);
+		wikicode = this._list(wikicode);
+		wikicode = this._table(wikicode);
+		wikicode = this._paragraph(wikicode);
+		wikicode = this._toc(wikicode);
 		
 		html = wikicode;
 		
 		return html;
-	}
+	},
 
-/* this function normalize line breaks
- * in order to have a common base string
- * for all browser
- */
-function deleteCR(wikicode)
-	{
+	// this function normalize line breaks
+	// in order to have a common base string
+	// for all browser
+	_deleteCR: function (wikicode) {
 		wikicode = wikicode.replace(/\r/g, '');
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                                    HEADER                                   *
-*******************************************************************************/
-function headers(wikicode)
-	{
+	// *******************************************************************************
+	// *                                    HEADER                                   *
+	// *******************************************************************************
+	_headers: function(wikicode) {
 		var heading_1_regEx = /^=[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?=/gm;
 		var heading_2_regEx = /^==[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?==/gm;
 		var heading_3_regEx = /^===[\s]*?([0-9A-Za-z].[^=\[]*)[\s]*?===/gm;
@@ -66,25 +64,23 @@ function headers(wikicode)
 		wikicode = wikicode.replace(heading_1_regEx, '<h1>$1</h1>');
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                             HORIZONTAL LINE                                 *
-*******************************************************************************/
-function horizontalRule(wikicode)
-	{
+	// *******************************************************************************
+	// *                             HORIZONTAL LINE                                 *
+	// *******************************************************************************
+	_horizontalRule: function(wikicode) {
 		var horizontalLine = /----/g;
 		
 		wikicode = wikicode.replace(horizontalLine, '<hr>');
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                               INLINE ELEMENT                                *
-*******************************************************************************/
-function inlineElement(wikicode)
-	{
+	// *******************************************************************************
+	// *                               INLINE ELEMENT                                *
+	// *******************************************************************************
+	_inlineElement: function(wikicode) {
 		var strongEm = /'''''([0-9A-Za-z].*)'''''/g;
 		var strong = /'''([0-9A-Za-z].*)'''/g;
 		var em = /''([0-9A-Za-z].*)''/g;
@@ -95,29 +91,29 @@ function inlineElement(wikicode)
 		wikicode = wikicode.replace(strong, '<strong>$1</strong>');
 		wikicode = wikicode.replace(em, '<em>$1</em>');
 	
-		while(tokens = image.exec(wikicode))
-			{
-				if(tokens.length == 5 && typeof(tokens[2]) != 'undefined' && typeof(tokens[3]) != 'undefined' && typeof(tokens[4]) != 'undefined')
-					{
-						tokens[2] = tokens[2].replace('|', '');
-						tokens[3] = tokens[3].replace('|alt=', '');
-						tokens[4] = tokens[4].replace('|', '');
-						wikicode = wikicode.replace(tokens[0], '<figure class="' + tokens[2] + '"><img src="' + tokens[1] + '" class="' + tokens[2] + '" alt="' + tokens[3] + '"><figcaption>' + tokens[4] + '</figcaption></figure>');
-					}
-				else
-					wikicode = wikicode.replace(tokens[0], '<div class="warning">WARNING: your image code is incomplete. Good practices for images impose to specify an alternative text, a caption and if the image is a frame or a thumbnail. For example, <code>&#091;&#091;File:anImage.png|thumb|alt=Alternative text|Caption text&#093;&#093;</code></div>');
+		while(tokens = image.exec(wikicode)) {
+			if(tokens.length == 5 &&
+				typeof(tokens[2]) != 'undefined' &&
+				typeof(tokens[3]) != 'undefined' &&
+				typeof(tokens[4]) != 'undefined') {
+				tokens[2] = tokens[2].replace('|', '');
+				tokens[3] = tokens[3].replace('|alt=', '');
+				tokens[4] = tokens[4].replace('|', '');
+				wikicode = wikicode.replace(tokens[0], '<figure class="' + tokens[2] + '"><img src="' + tokens[1] + '" class="' + tokens[2] + '" alt="' + tokens[3] + '"><figcaption>' + tokens[4] + '</figcaption></figure>');
 			}
+			else
+				wikicode = wikicode.replace(tokens[0], '<div class="warning">WARNING: your image code is incomplete. Good practices for images impose to specify an alternative text, a caption and if the image is a frame or a thumbnail. For example, <code>&#091;&#091;File:anImage.png|thumb|alt=Alternative text|Caption text&#093;&#093;</code></div>');
+		}
 	
 		wikicode = wikicode.replace(anchor, '<a href="$1">$2</a>');
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                                  LIST                                       *
-*******************************************************************************/
-function list(wikicode)
-	{
+	// *******************************************************************************
+	// *                                  LIST                                       *
+	// *******************************************************************************
+	_list: function(wikicode) {
 		// unordered
 		var unorderedStartList = /\n\n<li>/gm; //|\r\n\r\n<li>
 		var unorderedListItem = /^\*(.*)/gm;
@@ -137,25 +133,23 @@ function list(wikicode)
 		wikicode = wikicode.replace(orderedEndList, "</li>\n</ol>\n\n");
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                                  PARAGRAPH                                  *
-*******************************************************************************/
-function paragraph(wikicode)
-	{
+	// *******************************************************************************
+	// *                                  PARAGRAPH                                  *
+	// *******************************************************************************
+	_paragraph: function(wikicode) {
 		var paragraph = /\n\n([^#\*=].*)/gm; //|\r\n\r\n([^#\*=].*)
 		
 		wikicode = wikicode.replace(paragraph, "\n<p>$1</p>\n");
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                                  TABLE                                      *
-*******************************************************************************/
-function table(wikicode)
-	{
+	// *******************************************************************************
+	// *                                  TABLE                                      *
+	// *******************************************************************************
+	_table: function(wikicode) {
 		// http://www.mediawiki.org/wiki/Help:Tables
 		var tableStart = /^\{\|/gm;
 		var tableRow = /^\|-/gm;
@@ -170,16 +164,16 @@ function table(wikicode)
 		wikicode = wikicode.replace(tableEnd, '</tr></table>');
 		
 		return wikicode;
-	}
+	},
 
-/*******************************************************************************
- *                             TABLE OF CONTENTS                               *
-*******************************************************************************/
-function toc(wikicode)
-	{
+	// *******************************************************************************
+	// *                             TABLE OF CONTENTS                               *
+	// *******************************************************************************
+	_toc: function(wikicode) {
 		var toc = /^__TOC__/g;
 		
 		wikicode = wikicode.replace(toc, '<div class="warning">__TOC__ command is not supported yet.</div>');
 		
 		return wikicode;
 	}
+};
